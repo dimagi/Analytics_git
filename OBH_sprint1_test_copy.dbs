@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="OBH" id="Project-4f5" database="SqlServer" >
+	<schema name="dbo" >
+		<table name="Client_stub" prior="Client" spec="" >
+			<column name="client_case_id" type="varchar" jt="12" mandatory="y" />
+			<column name="first_name" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="last_name" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="full_name" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="gender_cd" type="char" length="1" jt="1" mandatory="y" />
+			<column name="age_or_dob" type="varchar" jt="12" mandatory="y" />
+			<column name="is_child_flag" type="char" length="1" jt="1" mandatory="y" />
+			<index name="pk_Client_client_case_id" unique="PRIMARY_KEY" >
+				<column name="client_case_id" />
+			</index>
+		</table>
+		<table name="DM_Date_Dim" spec="" >
+			<column name="date" type="date" jt="91" mandatory="y" />
+			<column name="month_nbr" type="int" jt="4" mandatory="y" />
+			<column name="month_nm" type="varchar" length="10" jt="12" mandatory="y" />
+			<column name="qtr_nbr" type="int" jt="4" mandatory="y" />
+			<column name="year" type="int" jt="4" mandatory="y" />
+			<index name="pk_Date_Dim_date" unique="PRIMARY_KEY" >
+				<column name="date" />
+			</index>
+		</table>
+		<table name="DM_Provider" prior="Provider" spec="" >
+			<comment><![CDATA[A provider dimension built off Case DIM base table.]]></comment>
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" >
+				<comment><![CDATA[unique case id for this provider.]]></comment>
+			</column>
+			<column name="provider_nm" type="varchar" length="500" jt="12" mandatory="y" >
+				<comment><![CDATA[descriptive name of the provider or facility.]]></comment>
+			</column>
+			<column name="address_st_nm" prior="address_fields" type="varchar" length="500" jt="12" mandatory="y" />
+			<column name="address_city_nm" type="varchar" length="100" jt="12" />
+			<column name="address_state_nm" type="varchar" length="100" jt="12" />
+			<column name="address_zip_cd" type="varchar" length="10" jt="12" />
+			<column name="address_full_txt" type="varchar" length="500" jt="12" />
+			<column name="phone_nbr" type="varchar" length="100" jt="12" />
+			<column name="mental_hlth_srvcs_flg" prior="mental_hlth_flg" type="varchar" length="5" jt="12" mandatory="y" />
+			<column name="su_srvcs_flg" prior="sud_srvcs_flg" type="varchar" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[true or false. when true, this provider has substance abuse services.]]></comment>
+			</column>
+			<column name="additional_srvs_flg" prior="other_srvs_flg" type="varchar" length="5" jt="12" mandatory="y" />
+			<column name="lang_es_flg" type="varchar" length="5" jt="12" >
+				<comment><![CDATA[true or false. 'true' means Spanish is spoken.]]></comment>
+			</column>
+			<column name="serve_deaf_hh_hear_flg" type="varchar" length="5" jt="12" />
+			<column name="serve_wheelchair_flg" type="varchar" length="5" jt="12" />
+			<column name="serve_blind_vis_imp_flg" type="varchar" length="5" jt="12" />
+			<column name="region_nm" type="varchar" length="50" jt="12" />
+			<column name="accept_medicaid_flg" type="varchar" length="5" jt="12" />
+			<column name="accept_priv_ins_flg" type="varchar" length="5" jt="12" />
+			<column name="accept_self_pay_flg" type="varchar" length="5" jt="12" />
+			<column name="accept_sliding_fee_scale_flg" type="varchar" length="5" jt="12" />
+			<column name="closed_dt" type="datetime" jt="92" mandatory="y" />
+			<column name="closed_by_usernm" type="varchar" jt="12" mandatory="y" />
+			<index name="pk_Provider_provider_case_id" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+			</index>
+			<fk name="fk_dm_provider_provider_stub" to_schema="dbo" to_table="Provider_stub" >
+				<fk_column name="provider_case_id" pk="case_id" />
+				<comment><![CDATA[1-1]]></comment>
+			</fk>
+		</table>
+		<table name="DM_Provider_Language" prior="Provider_Language" >
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="lang_cd" type="varchar" length="5" jt="12" mandatory="y" />
+			<column name="create_dttm" prior="create_dt" type="datetime" jt="92" />
+			<column name="is_active_flg" type="varchar" length="5" jt="12" >
+				<defo><![CDATA[true]]></defo>
+				<comment><![CDATA[true or false]]></comment>
+			</column>
+			<column name="inactive_dttm" prior="inactive_dt" type="date" jt="91" />
+			<index name="pk_Provider_Language" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+				<column name="lang_cd" />
+			</index>
+			<fk name="fk_provider_language" to_schema="dbo" to_table="DM_Provider" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+			<fk name="fk_provider_language_langRef" to_schema="dbo" to_table="REF_Languages" >
+				<fk_column name="lang_cd" pk="lang_cd" />
+			</fk>
+		</table>
+		<table name="DM_Provider_People_Served" prior="Provider_People_Served" >
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="people_cat_nm" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="create_dttm" type="datetime" jt="92" />
+			<column name="is_active_flg" type="varchar" length="5" jt="12" >
+				<defo><![CDATA[true]]></defo>
+				<comment><![CDATA[true or false]]></comment>
+			</column>
+			<column name="inactive_dttm" type="date" jt="91" />
+			<index name="pk_Provider_People_Served" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+				<column name="people_cat_nm" />
+			</index>
+			<fk name="fk_Provider_People_Served_REF_People_Category" to_schema="dbo" to_table="REF_People_Category" >
+				<fk_column name="people_cat_nm" pk="people_cat_nm" />
+			</fk>
+			<fk name="fk_Provider_People_Served_DM_Provider" to_schema="dbo" to_table="DM_Provider" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+		</table>
+		<table name="DM_Provider_Serv_Additional" >
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['additional services']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="create_dttm" type="datetime" jt="92" />
+			<column name="is_active_flg" type="varchar" length="5" jt="12" >
+				<defo><![CDATA[true]]></defo>
+				<comment><![CDATA[true or false]]></comment>
+			</column>
+			<column name="inactive_dttm" type="date" jt="91" />
+			<index name="pk_DM_Provider_Serv_Additional" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<fk name="fk_DM_Provider_Serv_Additional_DM_Provider" to_schema="dbo" to_table="DM_Provider" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+			<fk name="fk_DM_Provider_Serv_Additional_REF_Services_Additional" to_schema="dbo" to_table="REF_Services_Additional" >
+				<fk_column name="service_det_nm" pk="service_det_nm" />
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+			</fk>
+		</table>
+		<table name="DM_Provider_Serv_Mental_Health" >
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['mental_health']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="create_dttm" type="datetime" jt="92" />
+			<column name="is_active_flg" type="varchar" length="5" jt="12" >
+				<defo><![CDATA[true]]></defo>
+				<comment><![CDATA[true or false]]></comment>
+			</column>
+			<column name="inactive_dttm" type="date" jt="91" />
+			<index name="pk_DM_Provider_Serv_Mental_Health" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<index name="unq_DM_Provider_Serv_Mental_Health_provider_case_id" unique="UNIQUE_KEY" >
+				<column name="provider_case_id" />
+			</index>
+			<fk name="fk_dm_provider_serv_mental_health" to_schema="dbo" to_table="DM_Provider" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+			<fk name="fk_dm_provider_serv_mental_health_to_ref" to_schema="dbo" to_table="REF_Services_Mental_Health" >
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+				<fk_column name="service_det_nm" pk="service_det_nm" />
+			</fk>
+		</table>
+		<table name="DM_Provider_Serv_Substance_Use" >
+			<column name="provider_case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['substance_use']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="create_dttm" type="datetime" jt="92" />
+			<column name="is_active_flg" type="varchar" length="5" jt="12" >
+				<defo><![CDATA[true]]></defo>
+				<comment><![CDATA[true or false]]></comment>
+			</column>
+			<column name="inactive_dttm" type="date" jt="91" />
+			<index name="pk_DM_Provider_Serv_Substance_Use" unique="PRIMARY_KEY" >
+				<column name="provider_case_id" />
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<index name="unq_DM_Provider_Serv_Substance_Use_provider_case_id" unique="UNIQUE_KEY" >
+				<column name="provider_case_id" />
+			</index>
+			<fk name="fk_DM_Provider_Serv_Substance_Use_DM_Provider" to_schema="dbo" to_table="DM_Provider" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+			<fk name="fk_DM_Provider_Serv_Substance_Use_REF_Services_Substance_Use" to_schema="dbo" to_table="REF_Services_Substance_Use" >
+				<fk_column name="service_det_nm" pk="service_det_nm" />
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+			</fk>
+		</table>
+		<table name="DM_Referral" prior="DM" spec="" >
+			<column name="referral_case_id" type="varbinary(max)" jt="-3" mandatory="y" />
+			<column name="provider_case_id" type="varchar" jt="12" mandatory="y" />
+			<column name="provider_nm" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="client_case_id" type="varchar" jt="12" mandatory="y" />
+			<column name="client_first_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="client_last_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="referral_created_dt" type="date" jt="91" mandatory="y" />
+			<column name="referral_status_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="referral_accepted_dt" type="date" jt="91" mandatory="y" />
+			<column name="referral_rejected_dt" type="date" jt="91" mandatory="y" />
+			<column name="referral_srvc_type_gen_nm" prior="referral_type_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<comment><![CDATA[Values are {substance_use_services, mental_health_settings}]]></comment>
+			</column>
+			<column name="referral_substance_abuse_nm" prior="referral_srvc_substance_abuse_nm" type="varchar" length="50" jt="12" />
+			<column name="referral_mental_health_nm" prior="referral_srvc_mental_health_nm" type="varchar" length="50" jt="12" />
+			<column name="referral_additional_nm" prior="referral_srvc_other_nm" type="varchar" length="50" jt="12" />
+			<column name="referring_agency_id" type="varchar" jt="12" mandatory="y" />
+			<column name="referring_agency_nm" type="varchar" jt="12" mandatory="y" />
+			<column name="referral_closed_bool" type="varchar" jt="12" mandatory="y" />
+			<column name="closed_dt" type="datetime" jt="92" />
+			<column name="closed_by_usernm" type="varchar" jt="12" mandatory="y" />
+			<index name="unq_DM_Referral" unique="UNIQUE_KEY" >
+				<column name="referral_case_id" />
+			</index>
+			<index name="pk_DM_Referral" unique="PRIMARY_KEY" >
+				<column name="referral_case_id" />
+			</index>
+			<fk name="fk_Client_Client_Provider_Referral_Hist" to_schema="dbo" to_table="Client_stub" options="" >
+				<fk_column name="client_case_id" pk="client_case_id" />
+				<comment><![CDATA[1-1]]></comment>
+			</fk>
+			<fk name="fk_Provider_Client_Provider_Referral_Hist" to_schema="dbo" to_table="DM_Provider" options="" >
+				<fk_column name="provider_case_id" pk="provider_case_id" />
+			</fk>
+			<fk name="fk_DM_Referral_Referral_stub" to_schema="dbo" to_table="Referral_stub" >
+				<fk_column name="referral_case_id" pk="case_id" />
+				<comment><![CDATA[1-1]]></comment>
+			</fk>
+		</table>
+		<table name="Provider_stub" >
+			<column name="case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="&lt;plus audit fields&gt;" type="varbinary(max)" jt="-3" />
+			<index name="pk_Provider_stub" unique="PRIMARY_KEY" >
+				<column name="case_id" />
+			</index>
+		</table>
+		<table name="REF_Languages" >
+			<column name="lang_cd" type="varchar" length="20" jt="12" mandatory="y" />
+			<column name="lang_nm" type="varchar" length="100" jt="12" />
+			<index name="pk_REF_Languages" unique="PRIMARY_KEY" >
+				<column name="lang_cd" />
+			</index>
+		</table>
+		<table name="REF_Medications" prior="Medications" spec="" >
+			<comment><![CDATA[A listing of medication names.]]></comment>
+			<column name="medication_nm" type="varchar" length="100" jt="12" mandatory="y" />
+			<index name="pk_Medications_medication_nm" unique="PRIMARY_KEY" >
+				<column name="medication_nm" />
+			</index>
+		</table>
+		<table name="REF_People_Category" >
+			<column name="people_cat_nm" type="varchar" length="100" jt="12" mandatory="y" />
+			<index name="pk_REF_People_Category" unique="PRIMARY_KEY" >
+				<column name="people_cat_nm" />
+			</index>
+		</table>
+		<table name="REF_Service_Types_General" spec="" >
+			<comment><![CDATA[Values:
+mental_health
+substance_use
+additional_services]]></comment>
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<index name="pk_REF_Service_Types_General_service_name_gen" unique="PRIMARY_KEY" >
+				<column name="service_gen_nm" />
+			</index>
+		</table>
+		<table name="REF_Services_Additional" >
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['additional services']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<index name="pk_REF_Services_Additional" unique="PRIMARY_KEY" >
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<index name="unq_REF_Services_Additional_service_det_nm" unique="UNIQUE_KEY" >
+				<column name="service_det_nm" />
+				<column name="service_gen_nm" />
+			</index>
+			<fk name="fk_ref_services_additional" to_schema="dbo" to_table="REF_Service_Types_General" >
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+			</fk>
+		</table>
+		<table name="REF_Services_Mental_Health" prior="REF_Service_Types_Detail" spec="" >
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['mental_health']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<index name="pk_REF_Services_Mental_Health" unique="PRIMARY_KEY" >
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<fk name="fk_REF_Service_Types_General_REF_Service_Types_Detail" to_schema="dbo" to_table="REF_Service_Types_General" options="" >
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+			</fk>
+		</table>
+		<table name="REF_Services_Substance_Use" >
+			<column name="service_gen_nm" type="varchar" length="50" jt="12" mandatory="y" >
+				<defo><![CDATA['substance_use']]></defo>
+			</column>
+			<column name="service_det_nm" type="varchar" length="50" jt="12" mandatory="y" />
+			<index name="unq_REF_Services_Substance_Use_service_gen_nm" unique="UNIQUE_KEY" >
+				<column name="service_gen_nm" />
+			</index>
+			<index name="pk_REF_Services_Substance_Use" unique="PRIMARY_KEY" >
+				<column name="service_gen_nm" />
+				<column name="service_det_nm" />
+			</index>
+			<index name="unq_REF_Services_Substance_Use_service_det_nm" unique="UNIQUE_KEY" >
+				<column name="service_det_nm" />
+				<column name="service_gen_nm" />
+			</index>
+			<fk name="fk_ref_services_substance_use to General" to_schema="dbo" to_table="REF_Service_Types_General" >
+				<fk_column name="service_gen_nm" pk="service_gen_nm" />
+			</fk>
+		</table>
+		<table name="Referral_stub" prior="Referral_from_Jason" >
+			<comment><![CDATA[The referral table built from Jason]]></comment>
+			<column name="case_id" type="varchar(max)" jt="12" mandatory="y" />
+			<column name="&lt;plus audit fields&gt;" type="varchar(max)" jt="12" />
+			<index name="pk_Referral_from_Jason" unique="PRIMARY_KEY" >
+				<column name="case_id" />
+			</index>
+		</table>
+	</schema>
+	<connector name="MyDb" database="MySql" host="localhost" port="3306" user="root" />
+	<connector name="MyDb" database="MySql" host="localhost" port="3306" user="root" />
+	<connector name="MyDb" database="MySql" host="localhost" port="3306" user="root" />
+	<connector name="Snowflake" database="Snowflake" driver_class="com.snowflake.client.jdbc.SnowflakeDriver" driver_jar="snowflake-jdbc-3.13.14.jar" driver_desc="Standard" url="jdbc:snowflake://https://rea72908.us-east-1.snowflakecomputing.com/?db=DM_CO_DEMO&amp;warehouse=COMPUTE_WH&amp;role=USER_CO_DEMO" host="rea72908.us-east-1.snowflakecomputing.com" port="443" instance="DM_CO_DEMO" user="SVC_TABLEAU" passwd="c3ZjQFRhYmxlYXUxMjM=" />
+	<layout name="OBH Providers" id="Layout-bc8" show_column_type="y" show_relation="columns" >
+		<entity schema="dbo" name="Client_stub" color="F3F4BE" x="80" y="240" />
+		<entity schema="dbo" name="DM_Date_Dim" color="BED3F4" x="80" y="432" />
+		<entity schema="dbo" name="DM_Provider" color="3986C1" x="432" y="208" >
+			<callout x="528" y="144" pointer="SV" on="fk_dm_provider_provider_stub" />
+		</entity>
+		<entity schema="dbo" name="DM_Provider_Language" color="C1D8EE" x="256" y="688" />
+		<entity schema="dbo" name="DM_Provider_People_Served" color="C1D8EE" x="608" y="720" />
+		<entity schema="dbo" name="DM_Provider_Serv_Additional" color="C1D8EE" x="800" y="544" />
+		<entity schema="dbo" name="DM_Provider_Serv_Mental_Health" color="C1D8EE" x="800" y="160" />
+		<entity schema="dbo" name="DM_Provider_Serv_Substance_Use" color="C1D8EE" x="800" y="352" />
+		<entity schema="dbo" name="Provider_stub" color="BDC139" x="528" y="48" />
+		<entity schema="dbo" name="REF_Languages" color="C1D8EE" x="48" y="768" />
+		<entity schema="dbo" name="REF_People_Category" color="C1D8EE" x="928" y="784" />
+		<entity schema="dbo" name="REF_Service_Types_General" color="3986C1" x="1360" y="192" />
+		<entity schema="dbo" name="REF_Services_Additional" color="3986C1" x="1136" y="448" />
+		<entity schema="dbo" name="REF_Services_Mental_Health" color="3986C1" x="1104" y="80" />
+		<entity schema="dbo" name="REF_Services_Substance_Use" color="3986C1" x="1120" y="256" />
+		<shape x="96" y="80" style="Rectangle" color="FF0000" >
+			<comment><![CDATA[Draft 2/25/22  DM Provider
+Blue tables are new, in scope
+xx_stub tables are tables created off the JSONs]]></comment>
+		</shape>
+		<script name="DM_Provider_Serv_Mental_Health" id="Editor-2030" language="SQL" >
+			<string><![CDATA[CREATE TABLE dbo.DM_Provider_Serv_Mental_Health ( 
+	provider_case_id     varchar(max) NOT NULL    ,
+	service_gen_nm       varchar(50) NOT NULL CONSTRAINT [defo_DM_Provider_Serv_Mental_Health_service_gen_nm] DEFAULT 'mental_health'   ,
+	service_det_nm       varchar(50) NOT NULL CONSTRAINT [defo_DM_Provider_Serv_Mental_Health_service_det_nm] DEFAULT 'mental_health'   ,
+	create_dttm          datetime     ,
+	is_active_flg        varchar(5)  CONSTRAINT [defo_DM_Provider_Serv_Mental_Health_is_active_flg] DEFAULT true   ,
+	inactive_dttm        date     ,
+	CONSTRAINT pk_DM_Provider_Serv_Mental_Health PRIMARY KEY  ( provider_case_id, service_gen_nm, service_det_nm ) ,
+	CONSTRAINT unq_DM_Provider_Serv_Mental_Health_provider_case_id UNIQUE ( provider_case_id ) 
+ );
+GO
+
+ALTER TABLE dbo.DM_Provider_Serv_Mental_Health ADD CONSTRAINT fk_dm_provider_serv_mental_health FOREIGN KEY ( provider_case_id ) REFERENCES dbo.DM_Provider( provider_case_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+ALTER TABLE dbo.DM_Provider_Serv_Mental_Health ADD CONSTRAINT fk_dm_provider_serv_mental_health_to_ref FOREIGN KEY ( service_gen_nm, service_det_nm ) REFERENCES dbo.REF_Services_Mental_Health( service_gen_nm, service_det_nm ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+exec sys.sp_addextendedproperty  @name=N'MS_Description', @value=N'true or false' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'DM_Provider_Serv_Mental_Health', @level2type=N'COLUMN',@level2name=N'is_active_flg';
+GO
+]]></string>
+		</script>
+		<script name="DM_Provider_Serv_Substance_Use" id="Editor-138" language="SQL" >
+			<string><![CDATA[CREATE TABLE dbo.DM_Provider_Serv_Substance_Use ( 
+	provider_case_id     varchar(max) NOT NULL    ,
+	service_gen_nm       varchar(50) NOT NULL CONSTRAINT [defo_DM_Provider_Serv_Substance_Use_service_gen_nm] DEFAULT 'substance_use'   ,
+	service_det_nm       varchar(50) NOT NULL    ,
+	create_dttm          datetime     ,
+	is_active_flg        varchar(5)  CONSTRAINT [defo_DM_Provider_Serv_Substance_Use_is_active_flg] DEFAULT true   ,
+	inactive_dttm        date     ,
+	CONSTRAINT pk_DM_Provider_Serv_Substance_Use PRIMARY KEY  ( provider_case_id, service_gen_nm, service_det_nm ) ,
+	CONSTRAINT unq_DM_Provider_Serv_Substance_Use_provider_case_id UNIQUE ( provider_case_id ) 
+ );
+GO
+
+ALTER TABLE dbo.DM_Provider_Serv_Substance_Use ADD CONSTRAINT fk_DM_Provider_Serv_Substance_Use_DM_Provider FOREIGN KEY ( provider_case_id ) REFERENCES dbo.DM_Provider( provider_case_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+exec sys.sp_addextendedproperty  @name=N'MS_Description', @value=N'true or false' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'DM_Provider_Serv_Substance_Use', @level2type=N'COLUMN',@level2name=N'is_active_flg';
+GO]]></string>
+		</script>
+		<script name="OBH_sprint1_fromDEdo.sql" id="Editor-ba" language="SQL" >
+			<string><![CDATA[CREATE TABLE Client (
+	client_case_id varchar NOT NULL,
+	first_name varchar(50) NOT NULL,
+	last_name varchar(50) NOT NULL,
+	full_name varchar(50) NOT NULL,
+	gender_cd char(1) NOT NULL,
+	age_or_dob string NOT NULL,
+	is_child_flag char(1) NOT NULL,
+	CONSTRAINT pk_Client_client_case_id PRIMARY KEY (client_case_id)
+);
+
+CREATE TABLE DM Referral (
+	referral_case_id varchar NOT NULL,
+	provider_case_id varchar NOT NULL,
+	provider_nm varchar(100) NOT NULL,
+	client_case_id varchar NOT NULL,
+	client_first_nm varchar(50) NOT NULL,
+	client_last_nm varchar(50) NOT NULL,
+	referral_type_gen_nm varchar(50) NOT NULL,
+	referral_type_det_nm varchar(50) NOT NULL,
+	referral_created_dt date NOT NULL,
+	referral_status_nm varchar(50) NOT NULL,
+	referral_accepted_dt date NOT NULL,
+	referral_rejected_dt date NOT NULL,
+	referring_agency_id varchar NOT NULL,
+	referring_agency_nm varchar NOT NULL,
+	referral_closed_bool varchar NOT NULL,
+	closed_dt date NOT NULL,
+	closed_by_usernm varchar NOT NULL,
+	CONSTRAINT pk_Client Prov Referral Hist_referral_case_id PRIMARY KEY (referral_case_id)
+);
+
+CREATE TABLE DM Service (
+	provider_case_id varchar NOT NULL,
+	client_case_id varchar NOT NULL
+);
+
+CREATE TABLE DM_Date_Dim (
+	date date NOT NULL,
+	month_nbr int NOT NULL,
+	month_nm varchar(10) NOT NULL,
+	qtr_nbr int NOT NULL,
+	year int NOT NULL,
+	CONSTRAINT pk_Date_Dim_date PRIMARY KEY (date)
+);
+
+CREATE TABLE Medications Ref (
+	medication_nm varchar(100) NOT NULL,
+	CONSTRAINT pk_Medications_medication_nm PRIMARY KEY (medication_nm)
+);
+
+CREATE TABLE Provider (
+	provider_case_id varchar NOT NULL,
+	provider_nm varchar(100) NOT NULL,
+	address_fields varchar NOT NULL,
+	sud_srvcs_flg char(1) NOT NULL,
+	mental_hlth_flg char(1) NOT NULL,
+	other_srvs_flg char(1) NOT NULL,
+	region_nm varchar(25) NOT NULL,
+	CONSTRAINT pk_Provider_provider_case_id PRIMARY KEY (provider_case_id)
+);
+
+CREATE TABLE REF_Service_Types_Detail (
+	service_det_nm varchar NOT NULL,
+	service_gen_nm varchar NOT NULL,
+	CONSTRAINT pk_REF_Service_Types_Detail_service_det_nm PRIMARY KEY (service_det_nm)
+);
+
+CREATE TABLE REF_Service_Types_General (
+	service_gen_nm varchar NOT NULL,
+	CONSTRAINT pk_REF_Service_Types_General_service_name_gen PRIMARY KEY (service_gen_nm)
+);
+
+ALTER TABLE DM Referral ADD CONSTRAINT fk_Client_Client_Provider_Referral_Hist FOREIGN KEY (client_case_id)
+REFERENCES Client (client_case_id);
+
+ALTER TABLE DM Referral ADD CONSTRAINT fk_Provider_Client_Provider_Referral_Hist FOREIGN KEY (provider_case_id)
+REFERENCES Provider (provider_case_id);
+
+ALTER TABLE DM Referral ADD CONSTRAINT fk_REF_Service_Types_Detail_DM_Referral FOREIGN KEY (referral_type_det_nm)
+REFERENCES REF_Service_Types_Detail (service_det_nm);
+
+ALTER TABLE REF_Service_Types_Detail ADD CONSTRAINT fk_REF_Service_Types_General_REF_Service_Types_Detail FOREIGN KEY (service_gen_nm)
+REFERENCES REF_Service_Types_General (service_gen_nm);]]></string>
+		</script>
+		<script name="SQL_Editor" id="Editor-201c" language="SQL" >
+			<string><![CDATA[CREATE TABLE dbo.Client ( 
+	client_case_id       varchar NOT NULL    ,
+	first_name           varchar(50) NOT NULL    ,
+	last_name            varchar(50) NOT NULL    ,
+	full_name            varchar(50) NOT NULL    ,
+	gender_cd            char(1) NOT NULL    ,
+	age_or_dob           varchar NOT NULL    ,
+	is_child_flag        char(1) NOT NULL    ,
+	CONSTRAINT pk_Client_client_case_id PRIMARY KEY  ( client_case_id ) 
+ );
+GO
+
+CREATE TABLE dbo.DM_Date_Dim ( 
+	date                 date NOT NULL    ,
+	month_nbr            int NOT NULL    ,
+	month_nm             varchar(10) NOT NULL    ,
+	qtr_nbr              int NOT NULL    ,
+	year                 int NOT NULL    ,
+	CONSTRAINT pk_Date_Dim_date PRIMARY KEY  ( date ) 
+ );
+GO
+
+CREATE TABLE dbo.Medications ( 
+	medication_nm        varchar(100) NOT NULL    ,
+	CONSTRAINT pk_Medications_medication_nm PRIMARY KEY  ( medication_nm ) 
+ );
+GO
+
+CREATE TABLE dbo.Provider ( 
+	provider_case_id     varchar NOT NULL    ,
+	provider_nm          varchar(100) NOT NULL    ,
+	address_fields       varchar NOT NULL    ,
+	sud_srvcs_flg        char(1) NOT NULL    ,
+	mental_hlth_flg      char(1) NOT NULL    ,
+	other_srvs_flg       char(1) NOT NULL    ,
+	region_nm            varchar(25) NOT NULL    ,
+	CONSTRAINT pk_Provider_provider_case_id PRIMARY KEY  ( provider_case_id ) 
+ );
+GO
+
+CREATE TABLE dbo.REF_Service_Types_General ( 
+	service_gen_nm       varchar NOT NULL    ,
+	CONSTRAINT pk_REF_Service_Types_General_service_name_gen PRIMARY KEY  ( service_gen_nm ) 
+ );
+GO
+
+CREATE TABLE dbo.REF_Service_Types_Detail ( 
+	service_det_nm       varchar NOT NULL    ,
+	service_gen_nm       varchar NOT NULL    ,
+	CONSTRAINT pk_REF_Service_Types_Detail_service_det_nm PRIMARY KEY  ( service_det_nm ) 
+ );
+GO
+
+CREATE TABLE dbo.DM ( 
+	referral_case_id     varchar NOT NULL    ,
+	provider_case_id     varchar NOT NULL    ,
+	provider_nm          varchar(100) NOT NULL    ,
+	client_case_id       varchar NOT NULL    ,
+	client_first_nm      varchar(50) NOT NULL    ,
+	client_last_nm       varchar(50) NOT NULL    ,
+	referral_type_gen_nm varchar(50) NOT NULL    ,
+	referral_type_det_nm varchar(50) NOT NULL    ,
+	referral_created_dt  date NOT NULL    ,
+	referral_status_nm   varchar(50) NOT NULL    ,
+	referral_accepted_dt date NOT NULL    ,
+	referral_rejected_dt date NOT NULL    ,
+	referring_agency_id  varchar NOT NULL    ,
+	referring_agency_nm  varchar NOT NULL    ,
+	referral_closed_bool varchar NOT NULL    ,
+	closed_dt            date NOT NULL    ,
+	closed_by_usernm     varchar NOT NULL    ,
+	provider_case_id     varchar NOT NULL    ,
+	client_case_id       varchar NOT NULL    
+ );
+GO
+
+ALTER TABLE dbo.DM ADD CONSTRAINT fk_Client_Client_Provider_Referral_Hist FOREIGN KEY ( client_case_id ) REFERENCES dbo.Client( client_case_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+ALTER TABLE dbo.DM ADD CONSTRAINT fk_Provider_Client_Provider_Referral_Hist FOREIGN KEY ( provider_case_id ) REFERENCES dbo.Provider( provider_case_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+ALTER TABLE dbo.DM ADD CONSTRAINT fk_REF_Service_Types_Detail_DM_Referral FOREIGN KEY ( referral_type_det_nm ) REFERENCES dbo.REF_Service_Types_Detail( service_det_nm ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+ALTER TABLE dbo.REF_Service_Types_Detail ADD CONSTRAINT fk_REF_Service_Types_General_REF_Service_Types_Detail FOREIGN KEY ( service_gen_nm ) REFERENCES dbo.REF_Service_Types_General( service_gen_nm ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO]]></string>
+		</script>
+		<script name="SQL_Editor_001" id="Editor-1fea" language="SQL" >
+			<string><![CDATA[CREATE TABLE dbo.DM_Date_Dim ( 
+	date                 date NOT NULL    ,
+	month_nbr            int NOT NULL    ,
+	month_nm             varchar(10) NOT NULL    ,
+	qtr_nbr              int NOT NULL    ,
+	year                 int NOT NULL    ,
+	CONSTRAINT pk_Date_Dim_date PRIMARY KEY  ( date ) 
+ );
+GO]]></string>
+		</script>
+	</layout>
+	<layout name="OBH Referral" id="Layout-518" confirmed="y" show_column_type="y" show_relation="columns" >
+		<entity schema="dbo" name="Client_stub" color="BDC139" x="896" y="288" />
+		<entity schema="dbo" name="DM_Date_Dim" color="3986C1" x="224" y="736" />
+		<entity schema="dbo" name="DM_Provider" color="3986C1" x="368" y="192" >
+			<callout x="496" y="112" pointer="SV" on="fk_dm_provider_provider_stub" />
+		</entity>
+		<entity schema="dbo" name="DM_Referral" color="3986C1" x="512" y="656" >
+			<callout x="416" y="608" pointer="SV" on="fk_DM_Referral_Referral_stub" />
+		</entity>
+		<entity schema="dbo" name="Provider_stub" color="BDC139" x="592" y="80" />
+		<entity schema="dbo" name="REF_Service_Types_General" color="3986C1" x="1040" y="656" />
+		<entity schema="dbo" name="REF_Services_Additional" color="C1D8EE" x="1376" y="768" />
+		<entity schema="dbo" name="REF_Services_Mental_Health" color="3986C1" x="1104" y="800" />
+		<entity schema="dbo" name="REF_Services_Substance_Use" color="C1D8EE" x="864" y="800" />
+		<entity schema="dbo" name="Referral_stub" color="BDC139" x="80" y="544" />
+		<shape x="48" y="48" style="Rectangle" color="3955C1" >
+			<comment><![CDATA[Draft 2/24/22  DM Referral
+Blue tables are new, in scope
+xx_stub tables are tables created off the JSONs]]></comment>
+		</shape>
+	</layout>
+</project>
